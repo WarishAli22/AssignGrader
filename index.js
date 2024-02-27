@@ -7,6 +7,8 @@ const bcrypt = require('bcrypt');
 const flash = require('connect-flash');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
+const vc = require('./util_functions/validationChecks');
+
 
 
 
@@ -58,8 +60,6 @@ mongoose.connect('mongodb://localhost:27017/AssignGrader')
 // })
 
 
-
-
 let projectName = "AssignGrader";
 
 app.set('view engine', 'ejs');
@@ -84,24 +84,48 @@ app.get('/register', (req,res)=>{
   res.render('register', {messages: req.flash('error')})
 })
 
+app.get('/test', async (req,res)=>{
+  try{
+    let a = await Instructor.find({email:"jojo@gmail.com"});
+    if(a[0] == null){
+      console.log("ya");
+    }
+    else{
+      console.log("na");
+    }
+  }
+  catch(e){
+    res.send("error");
+  }
+  
+})
+
 //Posts
 app.post('/register', async (req,res)=>{
   const {email, username, password} = req.body;
-  console.log(username);
-  if(email.match((/^[A-Za-z\._\-0-9]*[@][A-Za-z]*[\.][a-z]{2,4}$/))){
-    const hashPass = await bcrypt.hash(password, 12);
-    const user = new Instructor({
+  let existingEmail = await vc.emailExists(email);
+  // console.log("exist: " + existingEmail);
+  if(existingEmail){
+    req.flash('error', "Email already exists");
+    res.redirect('/register');
+    }
+  else if(!vc.validEmail(email)){
+    req.flash('error', "Please Enter a valid email");
+    res.redirect('/register');
+  }
+    else{
+      const hashPass = await bcrypt.hash(password, 12);
+      const user = new Instructor({
       name: username,
       email : email,
       password : hashPass
   })
-  await user.save();
+  await user.save();   
+    }
   }
-  else{
-    req.flash('error', "Please Enter a valid email");
-    res.redirect('/register');
-  }
-})
+)
+
+
 
 // app.get('/instructors', async(req,res)=>{
 //   const inst = await Instructor.find({});
