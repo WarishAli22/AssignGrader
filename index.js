@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
 const path = require('path');
-const Instructor  = require('./models/instructor');
+const instructor  = require('./models/instructor');
 const bcrypt = require('bcrypt');
 const flash = require('connect-flash');
 const session = require('express-session');
@@ -77,11 +77,21 @@ app.use(flash());
 
 //Gets
 app.get('/', (req,res)=> {
-  res.render('home')
+  if(req.session.user_id){
+    res.render('home');
+  }
+  else{
+    res.redirect('/login');
+  }
+  
 })
 
 app.get('/register', (req,res)=>{
   res.render('register', {messages: req.flash('error')})
+})
+
+app.get('/login', (req,res)=>{
+  res.render('login', {messages: req.flash('error')});
 })
 
 app.get('/test', async (req,res)=>{
@@ -97,10 +107,32 @@ app.get('/test', async (req,res)=>{
   catch(e){
     res.send("error");
   }
-  
 })
 
 //Posts
+
+app.post('/login', async (req,res)=>{
+  const {email, password} = req.body;
+  const user = await instructor.findOne({email});
+  console.log(user);
+  if(user == null){
+    req.flash('error', "Incorrect Email or Password");
+    res.redirect("/login");
+  }
+  else{
+    const validPass = await bcrypt.compare(password, user.password);
+    if(validPass){
+      req.session.user_id = user._id;
+      res.redirect("/");
+    }
+    else{
+      req.flash('error', "Incorrect Email or Password");
+      res.redirect("/login");
+    }
+  }
+  
+})
+
 app.post('/register', async (req,res)=>{
   const {email, username, password} = req.body;
   let existingEmail = await vc.emailExists(email);
@@ -115,12 +147,13 @@ app.post('/register', async (req,res)=>{
   }
     else{
       const hashPass = await bcrypt.hash(password, 12);
-      const user = new Instructor({
+      const user = new instructor({
       name: username,
       email : email,
       password : hashPass
   })
-  await user.save();   
+  await user.save();
+  res.redirect('/login'); 
     }
   }
 )
