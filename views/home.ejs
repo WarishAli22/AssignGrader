@@ -9,6 +9,9 @@
 <h1>Home</h1>
 <input type="file" accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" id="fileInput">
 <button onclick="handleUpload()">Upload</button>
+<form action="/logout" method="POST">
+  <button>Logout</button>
+</form>
 
 <script>
 function handleUpload() {
@@ -24,6 +27,7 @@ function handleUpload() {
   }
   const formData = new FormData();
   formData.append('file', file);
+  
   
   // Here you can add code to send the file data to your server using fetch or XMLHttpRequest
   // For example:

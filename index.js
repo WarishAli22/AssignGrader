@@ -74,16 +74,18 @@ app.use(session({
 }));
 app.use(flash());
 
+//Login Middleware
+const requireLogin = (req,res,next)=>{
+  if(!req.session.user_id){
+    return res.redirect('/login');
+  }
+  next();
+}
+
 
 //Gets
-app.get('/', (req,res)=> {
-  if(req.session.user_id){
-    res.render('home');
-  }
-  else{
-    res.redirect('/login');
-  }
-  
+app.get('/', requireLogin, (req,res)=> {
+  res.render('home');
 })
 
 app.get('/register', (req,res)=>{
@@ -94,14 +96,14 @@ app.get('/login', (req,res)=>{
   res.render('login', {messages: req.flash('error')});
 })
 
-app.get('/test', async (req,res)=>{
+app.get('/test', requireLogin, async (req,res)=>{
   try{
-    let a = await Instructor.find({email:"jojo@gmail.com"});
+    let a = await instructor.find({email:"jojo@gmail.com"});
     if(a[0] == null){
-      console.log("ya");
+      res.send("ya");
     }
     else{
-      console.log("na");
+      res.send("na");
     }
   }
   catch(e){
@@ -131,6 +133,11 @@ app.post('/login', async (req,res)=>{
     }
   }
   
+})
+
+app.post('/logout', (req,res)=>{
+  req.session.user_id = null;
+  res.redirect('/login');
 })
 
 app.post('/register', async (req,res)=>{
