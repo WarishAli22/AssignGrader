@@ -1,54 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AssignGrader</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
 </head>
 <body>
-<h1>Home</h1>
-<input type="file" accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" id="fileInput">
-<button onclick="handleUpload()">Upload</button>
-<form action="/logout" method="POST">
-  <button>Logout</button>
-</form>
+  <form action="/sheetUpload" method="POST">
+    <input type="text" name="sheetLink" id="sheetLink" required>
+      <label for="sheetLink">Enter A Google Sheet Link</label>
+      <button id="uploadSheet">Upload</button>
+  </form>
 
-<script>
-function handleUpload() {
-  const fileInput = document.getElementById('fileInput');
-  const file = fileInput.files[0];
-  if (!file) {
-    alert('Please select a file to upload.');
-    return;
-  }
-  if (!file.name.endsWith('.csv') && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
-    alert('Please upload a Google Sheet file (CSV, XLSX, or XLS).');
-    return;
-  }
-  const formData = new FormData();
-  formData.append('file', file);
-  
-  
-  // Here you can add code to send the file data to your server using fetch or XMLHttpRequest
-  // For example:
-  /*
-  fetch('/upload', {
-    method: 'POST',
-    body: formData
-  })
-  .then(response => {
-    if (response.ok) {
-      alert('File uploaded successfully!');
-    } else {
-      alert('File upload failed.');
-    }
-  })
-  .catch(error => {
-    console.error('Error uploading file:', error);
-    alert('An error occurred while uploading the file.');
-  });
-  */
-}
-</script>
+  <form action="/logout" method="get">
+    <button id="logout">Logout</button>
+  </form>
+
 </body>
 </html>

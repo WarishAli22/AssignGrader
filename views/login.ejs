@@ -1,23 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
-<body>
-  <%= messages  %>
-  <form action="/login" method="POST">
-    <div>
-      <input type="text" name="email" id="email" required>
-      <label for="email">Enter Email</label>
-    </div>
+<html>
+  <head>
+    <title>Sheets API Quickstart</title>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <p>Sheet Uploader</p>
 
-    <div>
-      <input type="password" name="password" id="password" required>
-      <label for="password">Enter Password</label>
-    </div>
-    <button>Login</button>
-  </form>
-</body>
+    <form action="/auth/google" method="GET">
+      <button>Login With Google</button>
+    </form>
+  </body>
 </html>

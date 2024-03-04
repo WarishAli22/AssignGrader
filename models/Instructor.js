@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
+const findOrCreate = require('mongoose-findorcreate');
 const Schema = mongoose.Schema;
+
 
 const InstructorSchema = new Schema({
   name: {
@@ -13,7 +15,9 @@ const InstructorSchema = new Schema({
   password: {
     type: String,
     required: [true, "Password Cannot Be Blank"]
-  },
+  }
 })
+
+InstructorSchema.plugin(findOrCreate);
 
 module.exports = mongoose.model('Instructor', InstructorSchema);
