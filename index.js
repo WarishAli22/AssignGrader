@@ -111,7 +111,7 @@ app.post('/sheetUpload', async(req,res)=>{
     }));
 
     // Create Google Form
-    const formResponse = await forms.create({
+    const formResponse = forms.create({
       "info": {
         title: formTitle,
         questions: formQuestions,
@@ -128,11 +128,6 @@ app.post('/sheetUpload', async(req,res)=>{
   }
 
 })
-
-
-
-
-
 
 app.listen(4000, ()=>{
   console.log("Serving on Port 4000")
