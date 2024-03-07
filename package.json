@@ -12,6 +12,7 @@
   "dependencies": {
     "@google-cloud/local-auth": "^2.1.0",
     "@googleapis/docs": "^3.0.0",
+    "bootstrap": "^5.3.3",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.9",
     "express": "^4.18.3",

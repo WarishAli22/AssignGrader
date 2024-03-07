@@ -103,22 +103,6 @@ app.post('/sheetUpload', async(req,res)=>{
       });
     });
 
-    const formTitle = 'Generated Form';
-    const formQuestions = values.map(row => ({
-      type: 'text',
-      title: row[0], // Use first column data as question title
-      helpText: 'Please provide your answer',
-    }));
-
-    // Create Google Form
-    const formResponse = forms.create({
-      "info": {
-        title: formTitle,
-        questions: formQuestions,
-      },
-    });
-    const formId = formResponse.data.formId;
-    console.log(formId);
     console.log(extractedTexts);
     // Process rows and store data in your database
     res.status(200).json({ success: true, message: 'Data fetched and stored successfully!' });
