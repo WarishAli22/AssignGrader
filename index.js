@@ -76,16 +76,16 @@ app.get('/logout', (req,res)=>{
   });
 })
 
+
 //When we send a request to this path, everything inside is executed
 app.get('/llm', async (req,res)=>{
   const prompt = {
     'p' : `{
       ""
-      Write exactly 8 lines of a romance themed poem
+      Write a poem about love. Make sure it's only 8 lines
       ""
       }`
   }
-
   const options = { 
     method: 'POST', 
 
@@ -101,21 +101,21 @@ app.get('/llm', async (req,res)=>{
 }; 
 
 var sendrequest = await request(options) 
-  
-        // The parsedBody contains the data 
-        // sent back from the Flask server  
-        .then(function (parsedBody) { 
-            console.log("parsedBody: " + parsedBody); 
+      // The parsedBody contains the data 
+      // sent back from the Flask server  
+      .then(function (parsedBody) { 
+          console.log("parsedBody: " + parsedBody); 
               
-            // You can do something with 
-            // returned data 
-            let result; 
-            result = parsedBody['response']; 
-            console.log(result); 
-        }) 
-        .catch(function (err) { 
-            console.log(err); 
-        }); 
+          // You can do something with 
+          // returned data 
+          let result; 
+          result = parsedBody.response; 
+          res.render('run_llm', {result: result});
+          // console.log(result); 
+      }) 
+      .catch(function (err) { 
+          console.log(err); 
+      }); 
 })
 
 //Protected
