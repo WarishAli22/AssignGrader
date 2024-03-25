@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AssignGrader Prompter</title>
+
+  <style>
+    .text{
+      font-family:'Lexend', sans-serif;
+      font-weight: 500;
+      line-height: 1.5;
+      max-width: 300px;
+      padding: 1em;
+    }
+  </style>
+</head>
+<body>
+  <div class="invisibleText" style="display:none;"><%=result%></div>
+  <div class="AnswerText"></div>
+
+
+<script>
+  const div = document.querySelector(".AnswerText");
+  const invDiv = document.querySelector(".invisibleText");
+  const text = invDiv.textContent;
+
+    function textType(element, text, i=0){
+      element.textContent += text[i];
+
+      if(i === text.length - 1){
+        return;
+      }
+      setTimeout(()=> textType(element, text, i+1), 50);
+    }
+
+    textType(div, text);
+</script>
+</body>
+</html>

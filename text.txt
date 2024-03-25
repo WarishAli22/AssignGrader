@@ -1,1 +1,23 @@
 'Class Data!A2:E'
+
+<h1><%= result %></h1>
+  <div id="mydiv" data-test=<%= result %>></div>
+
+  <script>
+    const div = document.querySelector(".AnswerText");
+    const text = document.getElementById('mydiv').dataset.result;
+
+    function textType(element, text, i=0){
+      element.textContent += text[i];
+
+      if(i === text.length - 1){
+        return;
+      }
+      setTimeout(()=> textType(element, text, i+1), 50);
+    }
+
+    textType(div, text);
+  </script>
+
+  element.textContent += text[i];
+  const div = document.querySelector(".AnswerText");

@@ -9,13 +9,15 @@ const auth = require('./auth');
 const fs = require('fs').promises;
 const {google} = require('googleapis');
 
+const UploadedFile = require('./models/uploadedFile');
+
 const request = require('request-promise'); 
 const parsepdf = require('pdf-parse');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
 
-
+//Logged In Middleware
 function isLoggedIn(req,res,next){
   req.user ? next() : res.redirect("/");
 }
@@ -31,7 +33,7 @@ app.use(express.urlencoded({extended:true}));
 
 
 //Database Connections Checking using promises
-mongoose.connect('mongodb://localhost:27017/AssignGrader')
+mongoose.connect(process.env.mongodbserver)
 .then(()=>{
   console.log("Database Connected");
 })
@@ -46,13 +48,6 @@ mongoose.connect('mongodb://localhost:27017/AssignGrader')
 app.get('/', (req,res)=>{
   res.render("login");
 })
-
-app.get('/assess', (req,res)=>{
-  res.render('assessment')
-})
-
-
-
 
 app.get('/auth/google',
   passport.authenticate('google', {scope: ['email', 'profile', 'https://www.googleapis.com/auth/spreadsheets.readonly' , 'https://www.googleapis.com/auth/forms.body']})
@@ -76,16 +71,25 @@ app.get('/logout', (req,res)=>{
   });
 })
 
+
+
+
+
+//Protected Routes Start////////////////////////////////////////////////////////////////////////////////////////
+app.get('/home', isLoggedIn, (req,res)=>{
+  // console.log(req.user);
+  res.render("home");
+})
+
 //When we send a request to this path, everything inside is executed
-app.get('/llm', async (req,res)=>{
+app.get('/llm', isLoggedIn, async (req,res)=>{
   const prompt = {
     'p' : `{
       ""
-      Write exactly 8 lines of a romance themed poem
+      Write a poem about love. Make sure it's only 8 lines
       ""
       }`
   }
-
   const options = { 
     method: 'POST', 
 
@@ -101,27 +105,55 @@ app.get('/llm', async (req,res)=>{
 }; 
 
 var sendrequest = await request(options) 
-  
-        // The parsedBody contains the data 
-        // sent back from the Flask server  
-        .then(function (parsedBody) { 
-            console.log("parsedBody: " + parsedBody); 
+      // The parsedBody contains the data 
+      // sent back from the Flask server  
+      .then(function (parsedBody) { 
+          console.log("parsedBody: " + parsedBody); 
               
-            // You can do something with 
-            // returned data 
-            let result; 
-            result = parsedBody['response']; 
-            console.log(result); 
-        }) 
-        .catch(function (err) { 
-            console.log(err); 
-        }); 
+          // You can do something with 
+          // returned data 
+          let result; 
+          result = parsedBody.response; 
+          res.render('run_llm', {result: result});
+          // console.log(result); 
+      }) 
+      .catch(function (err) { 
+          console.log(err); 
+      }); 
 })
 
-//Protected
-app.get('/home', isLoggedIn, (req,res)=>{
-  // console.log(req.user);
-  res.render("home");
+app.get('/assess', isLoggedIn, (req,res)=>{ //isLoggedIn,//
+  res.render('assessment')
+})
+//Protected Routes End////////////////////////////////////////////////////////////////////////////////////////
+
+//POST REQS
+app.post('/pdfparse', upload.array('pdfFiles'), isLoggedIn, (req,res)=>{ //isLoggedIn,//
+
+  const files = req.files;
+  console.log(files);
+  console.log(req.user);
+  // if(!req.files && !req.files.pdfFile){
+  //   res.status(400);
+  //   res.end();
+  // }
+
+  files.forEach((file)=>{
+    parsepdf(file.path).then(result=>{
+      const uploadedFile = new UploadedFile({
+        filename: result.info.Title,
+        fileText: result.text,
+        userid: req.user.id,
+      })
+
+      uploadedFile.save().then(uploadedFile =>{
+        console.log("Save Success");
+      })
+      .catch(e=>{
+        console.log(e);
+      })
+    })
+  })
 })
 
 function sheetIdExtract(link){
@@ -129,21 +161,6 @@ function sheetIdExtract(link){
   let id = extract[1];
   return id;
 }
-
-//POST REQS
-app.post('/pdfparse', upload.array('pdfFiles'), (req,res)=>{
-
-  const files = req.files;
-  console.log(files[0]);
-  // if(!req.files && !req.files.pdfFile){
-  //   res.status(400);
-  //   res.end();
-  // }
-
-  parsepdf(files[0].path).then(result=>{
-    console.log(result.text);
-  })
-})
 
 
 app.post('/sheetUpload', async(req,res)=>{

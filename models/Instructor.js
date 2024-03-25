@@ -12,10 +12,10 @@ const InstructorSchema = new Schema({
     type: String,
     required: [true, "Email Cannot Be Blank"]
   },
-  password: {
+  id: {
     type: String,
-    required: [true, "Password Cannot Be Blank"]
-  }
+  },
+  uploadedFile: {fileName: String, fileText: String},
 })
 
 InstructorSchema.plugin(findOrCreate);
