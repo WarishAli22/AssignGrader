@@ -21,3 +21,54 @@
 
   element.textContent += text[i];
   const div = document.querySelector(".AnswerText");
+
+  const form = {
+      items: [
+        {
+          itemType: 'TEXT_ITEM',
+          text: {
+            prompt: 'What is your name?',
+            paragraph: false,
+          },
+        },
+        {
+          itemType: 'ITEM_GROUP',
+          choiceGroup: {
+            title: 'What is your favorite color?',
+            type: 'RADIO',
+            choices: [
+              { value: 'Red' },
+              { value: 'Green' },
+              { value: 'Blue' },
+            ],
+          },
+        },
+        {
+          itemType: 'TEXT_ITEM',
+          text: {
+            prompt: 'What is your favorite food?',
+            paragraph: true,
+          },
+        },
+        {
+          itemType: 'ITEM_GROUP',
+          choiceGroup: {
+            title: 'Do you like dogs?',
+            type: 'CHECKBOX',
+            choices: [
+              { value: 'Yes' },
+            ],
+          },
+        },
+        {
+          itemType: 'DATE_ITEM',
+          date: {
+            title: 'What is your birthday?',
+          },
+        },
+      ],
+    };
+
+
+
+    117856968482175078403
