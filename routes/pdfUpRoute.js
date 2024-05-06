@@ -1,9 +1,11 @@
 const express = require('express');
-const router = express.Router()
+const pdfrouter = express.Router()
 const UploadedFile = require('../models/uploadedFile');
 const parsepdf = require('pdf-parse');
 const multer = require('multer');
 const fs = require('fs').promises;
+const {storeData} = require("../storage");
+const {llmPrompt} = require("../storage");
 
 //Logged In Middleware
 isLoggedIn = require("../login")
@@ -13,18 +15,22 @@ isLoggedIn = require("../login")
       cb(null, './uploads')
     },
     filename: function (req, file, cb) {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-      cb(null, file.originalname + '-' + uniqueSuffix)
+      const uniquePrefix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+      cb(null, uniquePrefix + '-' + file.originalname)
       // cb(null, file.originalname)
     }
   })
   const upload = multer({ storage: storage })
 
-  router.post('/', upload.array('pdfFiles'), isLoggedIn, (req,res)=>{ //isLoggedIn,//
+  let pdfData = {};
+  let pdfDataArray = [];
 
+  pdfrouter.post('/', upload.array('pdfFiles'), isLoggedIn, (req,res)=>{ //isLoggedIn,//
+
+    
     const files = req.files;
     console.log(files);
-    console.log(req.user);
+    console.log("user data: " + req.user);
     
     // if(!req.files && !req.files.pdfFile){
     //   res.status(400);
@@ -32,23 +38,31 @@ isLoggedIn = require("../login")
     // }
   
     files.forEach((file)=>{
+      console.log(file.path)
       parsepdf(file.path).then(result=>{
         // console.log(result)
         console.log(file.filename)
         console.log(req.user.id)
-        console.log(result.text);
-        const uploadedFile = new UploadedFile({
+        // console.log(result.text);
+
+        pdfData = {
           filename: file.filename,
-          fileText: result.text,
+          filepath: file.path,
           userid: req.user.id,
-        })
+        }
+        pdfDataArray.push(pdfData)
+        // const uploadedFile = new UploadedFile({
+        //   filename: file.filename,
+        //   fileText: result.text,
+        //   userid: req.user.id,
+        // })
   
-        uploadedFile.save().then(uploadedFile =>{
-          console.log("Save Success");
-        })
-        .catch(e=>{
-          console.log(e);
-        })
+        // uploadedFile.save().then(uploadedFile =>{
+        //   console.log("Save Success");
+        // })
+        // .catch(e=>{
+        //   console.log(e);
+        // })
       })
       .catch(err=>{
         console.log(err);
@@ -60,4 +74,4 @@ isLoggedIn = require("../login")
 
 
 
-module.exports = router;
+module.exports = {pdfrouter, pdfDataArray};

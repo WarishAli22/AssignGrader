@@ -19,13 +19,13 @@ app.use(express.urlencoded({extended:true}));
 
 const homeRoute = require("./routes/homeRoute")
 const llmRoute = require("./routes/llmRoute")
-const sheetUpRoute = require("./routes/sheetUpRoute")
-const pdfUpRoute = require("./routes/pdfUpRoute")
+const {router} = require("./routes/sheetUpRoute")
+const {pdfrouter} = require("./routes/pdfUpRoute")
 
-app.use('/home', homeRoute )
+app.use('/home', homeRoute)
 app.use('/llm', llmRoute )
-app.use('/sheetUpload', sheetUpRoute)
-app.use('/pdfparse', pdfUpRoute)
+app.use('/sheetUpload', router)
+app.use('/pdfparse', pdfrouter)
 
 
 

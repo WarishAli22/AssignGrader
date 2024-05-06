@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router()
+const app = express();
 const {google} = require('googleapis');
+const {storeData} = require("../storage");
+const {llmPrompt} = require("../storage");
+const {result} = require("../storage");
+const {pdfDataArray} = require("../routes/pdfUpRoute");
 
 
 function sheetIdExtract(link){
@@ -80,6 +85,7 @@ async function generateForm(questions, forms){
   return response.data.formId;
 }
 
+let sheetStore = {};
 
 router.post('/', async(req,res)=>{
 
@@ -106,17 +112,101 @@ router.post('/', async(req,res)=>{
       range: `${sheetTitle}!A2:A`,
     })
 
-    // console.log(unfilt_questions.data.values);
+    const levels = await sheets.spreadsheets.values.get({
+      auth: oAuth2Client,
+      spreadsheetId: sheetID,
+      range: `${sheetTitle}!B2:B`,
+    }) 
 
-    const questions = unfilt_questions.data.values.filter(subArray => subArray.length > 0);
+    const criteria = await sheets.spreadsheets.values.get({
+      auth: oAuth2Client,
+      spreadsheetId: sheetID,
+      range: `${sheetTitle}!C2:C`,
+    }) 
+
+    const marks = await sheets.spreadsheets.values.get({
+      auth: oAuth2Client,
+      spreadsheetId: sheetID,
+      range: `${sheetTitle}!D2:D`,
+    }) 
+
+
+    // const questions = unfilt_questions.data.values.filter(subArray => subArray.length > 0);
     let questionArray = [];
-    for(let i=0; i<questions.length; i++){
-      let q = questions[i][0].replace(/(\r\n|\n|\r)/gm, "");
+    let q;
+    for(let i=0; i<unfilt_questions.data.values.length; i++){
+      if(unfilt_questions.data.values[i][0] != null){
+        q = unfilt_questions.data.values[i][0].replace(/(\r\n|\n|\r)/gm, " ");
+      }
+      else{
+        q = unfilt_questions.data.values[i][0]
+      }
+      
       questionArray.push(q);
     }
-    console.log(questionArray);
-    
 
+    console.log("questionArray: ");
+    console.log(questionArray[0]);
+
+    const criterias = criteria.data.values;
+    let criteriaArray = [];
+    for(let i=0; i<criterias.length; i++){
+      let q = criterias[i][0].replace(/(\r\n|\n|\r)/gm, " ");
+      criteriaArray.push(q);
+    }
+
+    console.log("criteriaArray: ");
+    console.log(criteriaArray);
+
+    const level = levels.data.values;
+    let levelsArray = [];
+    for(let i=0; i<level.length; i++){
+      let l = level[i][0].toLowerCase();
+      levelsArray.push(l);
+    }
+    console.log("levelsArray");
+    console.log(levelsArray);
+
+    const mark = marks.data.values;
+    let marksArray = [];
+    for(let i=0; i<mark.length; i++){
+      let m = mark[i][0];
+      marksArray.push(m);
+    }
+    console.log("marksArray");
+    console.log(marksArray);
+
+
+
+    let rubricArr = []
+    
+    
+    let j = 0;
+    for(let i=0; i<questionArray.length; i+=7){
+      let rubricObj = {}
+      if(questionArray[i] != null){
+        rubricObj["question"] = questionArray[j];
+        while(j<i+7){
+          rubricObj[`${levelsArray[j]}`] = {
+            "criteria" : criteriaArray[j],
+            "mark" : marksArray[j]
+          }
+          j++
+        }
+        rubricArr.push(rubricObj)
+      }
+    }
+    console.log("rubricArr: ")
+    console.log(rubricArr)
+
+    sheetStore["questions"] = questionArray;
+    llmPrompt(rubricArr, result)
+    storeData(sheetStore, pdfDataArray);
+
+
+    // console.log(sheetStore)
+
+  
     //Generates Form by taking in questions array and form auth object as param
     const formID = await generateForm(questionArray, forms);
     console.log(formID);
@@ -130,4 +220,4 @@ router.post('/', async(req,res)=>{
 
 })
 
-module.exports = router;
+module.exports = {router, sheetStore};

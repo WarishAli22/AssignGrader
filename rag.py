@@ -1,9 +1,8 @@
-from flask import Flask, request
-import json
-from ctransformers import AutoModelForCausalLM
-from ctransformers import AutoModelForCausalLM
 import fitz
 import pandas as pd
+from flask import request
+from script import app
+import json
 import re
 from sentence_transformers import util, SentenceTransformer
 import torch
@@ -19,27 +18,14 @@ def split_list(input_list: list,
     """
     return [input_list[i:i + slice_size] for i in range(0, len(input_list), slice_size)]
 
-app = Flask(__name__)
-@app.route('/llm_response', methods = ['POST']) 
-def get_response():
-  prompt = request.get_json()
-  llm = AutoModelForCausalLM.from_pretrained(
-    "K:/llama2_GGUF_cacheDir/models--TheBloke--Llama-2-7B-Chat-GGUF/TheBloke/Mistral-7B-OpenOrca-GGUF",
-    model_file="mistral-7b-openorca.Q5_K_M.gguf",
-    model_type="mistral",
-    gpu_layers = 12                                                               
-    )
-  response = llm(prompt['p'])
-  return json.dumps({"response" : response})
 
+def getEmbeddings() -> list[dict]:
 
-@app.route('/rag_response', methods = ['POST']) 
-def getEmbeddings():
-  req = request.get_json()
-  print("request: ")
-  print(req)
+  # req = request.get_json()
+  # print("request: ")
+  # print(req)
   # pdf_path = req.pdfData[0].filepath
-  pdf_path = req["pdfData"][0]['filepath']
+  pdf_path = "uploads/rag.pdf"
   #Minor text formatting: replaces new lines with spaces and strips the white spaces
   #This removes new lines
   doc = fitz.open(pdf_path)
@@ -164,12 +150,8 @@ def getEmbeddings():
 
   i=1; j=0; senc_arr = []
   while(i<2):
-    if(len(top_results_dot_product[1]) ==2):
+    if(len(top_results_dot_product[1]) >=2):
       while(j<2):
-        senc_arr.append(pages_and_chunks[top_results_dot_product[1][j]]["sentence_chunk"])
-        j+=1
-    elif(len(top_results_dot_product[1]) > 2):
-      while(j<3):
         senc_arr.append(pages_and_chunks[top_results_dot_product[1][j]]["sentence_chunk"])
         j+=1
     elif(len(top_results_dot_product[1]) == 1):
@@ -180,15 +162,16 @@ def getEmbeddings():
     sentence_chunk = ' '.join(senc_arr)
     i+=1
 
+  print(sentence_chunk)
 
-  # Import saved file and view
-  # print(text_chunks_and_embedding_df_load.head())
-  return json.dumps({"response" : sentence_chunk})
+  
+  
+  # for score, indices in zip(top_results_dot_product[0], top_results_dot_product[1]):
+  #    print(f"Score: {score}")
+  #    print(f"Text: ")
+  #    print(pages_and_chunks[indices]["sentence_chunk"])
+
+getEmbeddings()
 
 
 
-
-
-
-if __name__ == "__main__":  
-    app.run(port=5000)
