@@ -13,22 +13,26 @@
 </style>
 </head>
 <body>
-  <div class="container-fluid">
+  <button id="createAssessmentBtn">Create Assessment</button>
+
+  <div class="container-fluid portal">
     <form action="/sheetUpload" method="POST">
       <input type="text" name="sheetLink" id="sheetLink" required>
         <label for="sheetLink">Enter A Google Sheet Link</label>
+
+        <div id="assessmentPortal" class="portal">
+          <h2>Upload PDF Files</h2>
+          <label for="fileInput">Files: </label>
+          <input type="file" id="fileInput" name="fileInput" multiple>
+      </div>
+
+      
         <button id="uploadSheet">Upload</button>
     </form>
   </div>
 
-  <button id="createAssessmentBtn">Create Assessment</button>
 
-  <div id="assessmentPortal" class="portal">
-    <h2>Upload PDF Files</h2>
-    <label for="fileInput">Files: </label>
-    <input type="file" id="fileInput" name="fileInput" multiple>
-    <button id="uploadBtn">Upload</button>
-</div>
+  
   
   <div>
     <form action="/logout" method="get">
@@ -39,10 +43,13 @@
 
   <script>
     document.getElementById('createAssessmentBtn').addEventListener('click', function() {
-        document.getElementById('assessmentPortal').style.display = 'block';
+        let portal = document.querySelectorAll('.portal');
+        portal.forEach((element)=>{
+          element.style.display = "block"
+        })
     });
 
-    document.getElementById('uploadBtn').addEventListener('click', function(){
+    document.getElementById('uploadSheet').addEventListener('click', function(){
         var fileList = document.getElementById('fileInput').files;
         var fileListContainer = document.getElementById('fileList');
         var formData = new FormData();

@@ -5,7 +5,7 @@ const router = express.Router()
 isLoggedIn = require("../login")
 
 router.get('/', isLoggedIn, (req,res)=>{
-  console.log(req.user);
+  // console.log(req.user);
   res.render("home");
 })
 

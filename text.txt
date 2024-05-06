@@ -1,3 +1,8 @@
+()
+
+Mongol empire, empire founded by Genghis Khan in 1206. Originating from the Mongol heartland in the Steppe of central Asia, by the late 13th century it spanned from the Pacific Ocean in the east to the Danube River and the shores of the Persian Gulf in the west. At its peak, it covered some 9 million square miles (23 million square km) of territory, making it the largest contiguous land empire in world history The year 1206, when TemÃ¼jin, son of YesÃ¼gei, was elected Genghis Khan of a federation of tribes on the banks of the Onon River, must be regarded as the beginning of the Mongol empire. This federation not only consisted of Mongols in the proper senseâ€”that is, Mongol-speaking tribesâ€”but also other Turkic tribes. Before 1206 Genghis Khan was but one of the tribal leaders fighting for supremacy in the steppe regions south and southeast of Lake Baikal; his victories over the Kereit and then the Naiman Turks, however, gave him undisputed authority over the whole of what is now Mongolia. A series of campaigns, some of them carried out simultaneously, followed. The first attack (1205â€“09) was directed against the Tangut kingdom of Hsi Hsia (Xi Xia), a northwestern border-state of China, and ended in a declaration of allegiance by the Xi Xia king. A subsequent campaign was aimed at north China, which at that time was ruled by the Tungusic Jin dynasty.
+
+
 'Class Data!A2:E'
 
 <h1><%= result %></h1>
