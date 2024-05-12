@@ -4,8 +4,8 @@ const UploadedFile = require('../models/uploadedFile');
 const parsepdf = require('pdf-parse');
 const multer = require('multer');
 const fs = require('fs').promises;
-const {storeData} = require("../storage");
-const {llmPrompt} = require("../storage");
+const {storeData} = require("../bundleData");
+const {llmPrompt} = require("../bundleData");
 
 //Logged In Middleware
 isLoggedIn = require("../login")

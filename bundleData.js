@@ -2,7 +2,7 @@ const request = require('request-promise');
 
 
 let result;
-async function storeData(sheetData, pdfData){
+async function getContext(sheetData, pdfData){
   const combinedData = {
     sheetData,
     pdfData
@@ -33,7 +33,7 @@ var sendrequest = await request(options)
           // You can do something with 
           // returned data 
           result = parsedBody.response; 
-          console.log(result); 
+          return result; 
       }) 
       .catch(function (err) { 
           console.log(err); 
@@ -76,4 +76,4 @@ var sendrequest = await request(options)
       });
 }
 
-module.exports = {storeData, llmPrompt, result};
+module.exports = {getContext, llmPrompt, result};
