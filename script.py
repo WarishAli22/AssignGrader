@@ -156,10 +156,11 @@ def getEmbeddings():
   # print(embeddings)
 
   sentence_chunk
-  query = "Naive RAG"
+  query = req["sheetData"]
   query_embedding = embedding_model.encode(query)
-  dot_scores = util.cos_sim(a=query_embedding, b=embeddings)[0]
+  dot_scores = util.dot_score(a=query_embedding, b=embeddings)[0]
   top_results_dot_product = torch.topk(dot_scores, k=len(embeddings))
+  print("top_results_dot_product: ")
   print(top_results_dot_product)
 
   i=1; j=0; senc_arr = []
@@ -169,7 +170,7 @@ def getEmbeddings():
         senc_arr.append(pages_and_chunks[top_results_dot_product[1][j]]["sentence_chunk"])
         j+=1
     elif(len(top_results_dot_product[1]) > 2):
-      while(j<3):
+      while(j<len(top_results_dot_product[1])-1):
         senc_arr.append(pages_and_chunks[top_results_dot_product[1][j]]["sentence_chunk"])
         j+=1
     elif(len(top_results_dot_product[1]) == 1):

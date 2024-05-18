@@ -25,3 +25,6 @@ passport.serializeUser(function(user,cb){
 passport.deserializeUser(function(user,cb){
   cb(null,user);
 });
+
+
+
