@@ -3,6 +3,7 @@ const request = require('request-promise');
 
 let result;
 async function getContext(sheetData, pdfData){
+  let res;
   const combinedData = {
     sheetData,
     pdfData
@@ -24,27 +25,34 @@ async function getContext(sheetData, pdfData){
     json: true
 }; 
 
+let response;
 var sendrequest = await request(options) 
       // The parsedBody contains the data 
       // sent back from the Flask server  
       .then(function (parsedBody) { 
-          console.log("parsedBody: " + parsedBody); 
+          // console.log("parsedBody: " + parsedBody); 
               
           // You can do something with 
           // returned data 
-          result = parsedBody.response; 
-          return result; 
+          // console.log(parsedBody.response); 
+          response =  parsedBody.response;
       }) 
       .catch(function (err) { 
           console.log(err); 
       }); 
+
+      return response;
 }
 
-async function llmPrompt(questions, context){
-  const llm_data = {
-    questions,
-    context
+async function llmPrompt(rubricArray){
+  
+  for(let i=0; i<rubricArray.length; i++){
+    for(let j=0; j<Object.values(rubricArray[i]).length; j++){
+      
+    }
   }
+
+
   const options = { 
     method: 'POST', 
 

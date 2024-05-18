@@ -1,11 +1,20 @@
 const express = require('express');
 const router = express.Router()
 const app = express();
+const path = require('path');
 const {google} = require('googleapis');
 const {getContext} = require("../bundleData");
 const {llmPrompt} = require("../bundleData");
 const {result} = require("../bundleData");
 const {pdfDataArray} = require("../routes/pdfUpRoute");
+const {generateForm} = require("../quesFormGenerate");
+const {getFormData} = require("../quesFormGenerate");
+const {getFormsAndFormID} = require("../quesFormGenerate");
+const { initializeGoogleClients, forms, sheets } = require('../initializeGoogleClients');
+
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'))
+
 
 
 function sheetIdExtract(link){
@@ -14,87 +23,23 @@ function sheetIdExtract(link){
   return id;
 }
 
-async function generateForm(questions, forms){
-  //Basic Form Info
-  const newForm = {
-    info: {
-      title: 'Question Form',
-    },
-  };
 
-  //Creating Form
-  const response = await forms.forms.create({
-    requestBody: newForm,
-  });
-  // console.log(response.data);
-  // console.log('Form created successfully!');
 
-  const updateReq = {
-    requests: [
-      {
-        updateFormInfo: {
-          info: {
-            description:
-              'Please complete this quiz',
-          },
-          updateMask: 'description',
-        },
-      },
-    ],
-  }
 
-  const updateResponse = await forms.forms.batchUpdate({
-    formId: response.data.formId,
-    requestBody: updateReq,
-  });
-  console.log('Form Updated successfully!');
+let rubricArr = [];
 
-  let request = new Array();
-
-  questions.forEach((question, index) => {
-    request.push(
-      {
-        createItem: {
-          item: {
-            title: question,
-            questionItem: {
-              question: {
-                textQuestion: {}
-              }
-            }
-          },
-          location: {
-            index: index,
-          },
-        },
-      }
-    )
-  })
-
-  //Making The Request Body to send to the form
-  const addReq = {
-    requests: request
-  }
-
-  const addResponse = await forms.forms.batchUpdate({
-    formId: response.data.formId,
-    requestBody: addReq,
-  });
-  console.log('Form Item Added successfully!');
-
-  return response.data.formId;
-}
-
-let rubricArr = []
 
 router.post('/', async(req,res)=>{
-
-  const {sheetLink} = req.body;
-  const sheetID = sheetIdExtract(sheetLink);
-  const oAuth2Client = new google.auth.OAuth2();
-  oAuth2Client.setCredentials(req.user.tokens);
-  const forms = google.forms({ version: 'v1', auth: oAuth2Client });
-  const sheets = google.sheets({ version: 'v4' , auth: oAuth2Client});
+  
+  const {rubricSheetLink} = req.body;
+  const {studentSheetLink} = req.body;
+  
+  const sheetID = sheetIdExtract(rubricSheetLink);
+  // const oAuth2Client = new google.auth.OAuth2();
+  // oAuth2Client.setCredentials(req.user.tokens);
+  const {forms, sheets, oAuth2Client} = initializeGoogleClients(req)
+  // const forms = google.forms({ version: 'v1', auth: oAuth2Client });
+  // const sheets = google.sheets({ version: 'v4' , auth: oAuth2Client});
   try {
     const metadata = await sheets.spreadsheets.get({
       auth: oAuth2Client,
@@ -139,9 +84,6 @@ router.post('/', async(req,res)=>{
       questionArray.push(q);
     }
 
-    console.log("questionArray: ");
-    console.log(questionArray);
-
     const criterias = criteria.data.values;
     let criteriaArray = [];
     for(let i=0; i<criterias.length; i++){
@@ -149,8 +91,6 @@ router.post('/', async(req,res)=>{
       criteriaArray.push(q);
     }
 
-    console.log("criteriaArray: ");
-    console.log(criteriaArray);
 
     const level = levels.data.values;
     let levelsArray = [];
@@ -158,8 +98,7 @@ router.post('/', async(req,res)=>{
       let l = level[i][0].toLowerCase();
       levelsArray.push(l);
     }
-    console.log("levelsArray");
-    console.log(levelsArray);
+
 
     const mark = marks.data.values;
     let marksArray = [];
@@ -167,20 +106,8 @@ router.post('/', async(req,res)=>{
       let m = mark[i][0];
       marksArray.push(m);
     }
-    console.log("marksArray");
-    console.log(marksArray.length);
-
-    console.log("levelsArray");
-    console.log(levelsArray.length);
-
-    console.log("criteriaArray");
-    console.log(criteriaArray.length);
-
-    console.log("questionArray");
-    console.log(questionArray.length);
 
     let length = levelsArray.length
-    console.log(questionArray);
 
     let indexArray = [];
     for(let k=0; k<length; k++){
@@ -193,86 +120,50 @@ router.post('/', async(req,res)=>{
     }
     console.log(indexArray);
 
-    let rubricArr = [];
-    questionArray.forEach((question, idx) =>{
-      console.log("idx: " + idx);
-      let rubricObj = {};
-      rubricObj["question"] = question;
-      let i = indexArray[idx];
-      let j = indexArray[idx+1];
-      for(let k = i; k<j; k++){
-        rubricObj["levels"] = [].push({
-          "level" : `${levelsArray[k]}`,
-          "criteria" : criteriaArray[k],
-          "mark" : marksArray[k]
-        })
-      }
-      rubricArr.push(rubricObj);
-    })
+      
 
-    console.log(rubricArr)
+  // let idx = 0;
+  // for(const question of questionArray) {
+  //     let rubricObj = {};
+  //     rubricObj["question"] = question;
+  //     let context = await getContext(question, pdfDataArray)
+  //       rubricObj["context"] = context;
+  //       let i = indexArray[idx];
+  //       let j = indexArray[idx+1];
+  //       for(let k = i; k<j; k++){
+  //           rubricObj[`${levelsArray[k]}`] = {
+  //               "level" : `${levelsArray[k]}`,
+  //               "criteria" : criteriaArray[k],
+  //               "mark" : marksArray[k]
+  //           }
+  //       }
+  //       idx++
+  //       rubricArr.push(rubricObj);
+// };
 
-
-
-   
-
-
+      // console.log(rubricArr);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // let context = await getContext(rubricArr, pdfDataArray);
-    // console.log("Context: " + context);
-
-  
     //Generates Form by taking in questions array and form auth object as param
-    // const formID = await generateForm(questionArray, forms);
-    // console.log(formID);
+    const formID = await generateForm(questionArray, forms);
+    const formLink = `https://docs.google.com/forms/d/${formID}/edit`
+    console.log(formLink);
+
+    // getFormData(forms, formID)
+    
+    
 
     // TODO Process rows and store data in your database
 
+
+    res.render('genmarkSheet', { "formID": formID });
   } catch (error) {
     console.error('Error fetching data:', error);
     // res.status(500).json({ success: false, message: 'Failed to fetch data from Google Sheets.' });
   }
-
+  
 })
 
+
 module.exports = {router, rubricArr};
+

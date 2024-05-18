@@ -21,11 +21,15 @@ const homeRoute = require("./routes/homeRoute")
 const llmRoute = require("./routes/llmRoute")
 const {router} = require("./routes/sheetUpRoute")
 const {pdfrouter} = require("./routes/pdfUpRoute")
+const {marksheetRouter} = require("./routes/marksheetRoute")
+const {markviewRouter} = require("./routes/genmarkviewRoute")
 
 app.use('/home', homeRoute)
 app.use('/llm', llmRoute )
 app.use('/sheetUpload', router)
 app.use('/pdfparse', pdfrouter)
+app.use('/genmarksheet', marksheetRouter)
+app.use('/genForm', markviewRouter)
 
 
 
@@ -46,7 +50,7 @@ app.get('/', (req,res)=>{
 })
 
 app.get('/auth/google',
-  passport.authenticate('google', {scope: ['email', 'profile', 'https://www.googleapis.com/auth/spreadsheets.readonly' , 'https://www.googleapis.com/auth/forms.body']})
+  passport.authenticate('google', {scope: ['email', 'profile', 'https://www.googleapis.com/auth/spreadsheets.readonly' , 'https://www.googleapis.com/auth/forms.body', 'https://www.googleapis.com/auth/forms.responses.readonly']})
 )
 
 app.get('/google/callback', 

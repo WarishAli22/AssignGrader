@@ -26,7 +26,6 @@ isLoggedIn = require("../login")
   let pdfDataArray = [];
 
   pdfrouter.post('/', upload.array('pdfFiles'), isLoggedIn, (req,res)=>{ //isLoggedIn,//
-
     
     const files = req.files;
     console.log(files);
