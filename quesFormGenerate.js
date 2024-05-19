@@ -24,6 +24,35 @@ const getFormsAndFormID = async (req, questionArray) => {
   }
 };
 
+async function createMarkSheet(sheets, oAuth2Client, data){
+
+   // Create a new spreadsheet.
+   const spreadsheet = await sheets.spreadsheets.create({
+    requestBody: {
+      properties: {
+        title: 'New Spreadsheet',
+      },
+    },
+  });
+
+   // Get the spreadsheet ID.
+   const spreadsheetId = spreadsheet.data.spreadsheetId;
+
+   // Populate the first sheet with data from the array.
+   await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: 'Sheet1!A1',
+    valueInputOption: 'RAW',
+    requestBody: {
+      values: data.map((item) => [item]),
+    },
+  });
+
+  const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#gid=0`;
+  console.log(url)
+  return url;
+}
+
 async function generateForm(questions, forms){
   //Basic Form Info
   const newForm = {
@@ -146,7 +175,7 @@ async function getFormData(formID, forms){
 
 
 
-module.exports = {generateForm, getFormData, getFormsAndFormID}
+module.exports = {generateForm, getFormData, getFormsAndFormID, createMarkSheet}
 
 
 // for(let i=0; i<answersArr.length; i++){
